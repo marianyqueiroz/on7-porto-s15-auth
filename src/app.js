@@ -1,44 +1,33 @@
-const express = require("express")
-const bodyParser = require("body-parser")
-const mongoose = require("mongoose")
+require("dotenv-safe").config();
 
-const app = express()
+const express = require("express");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const app = express();
 
-//String de conexão
-mongoose.connect("mongodb://localhost:27017/reprograma", {
+mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
-//Conexão com o mongo
 let db = mongoose.connection;
 
-// Captura de erro ou sucesso na conexão
-db.on("error", console.log.bind(console, "connection error:"))
-db.once("open", function (){
-  console.log("conexão feita com sucesso.")
-})
+db.on("error", console.log.bind(console, "connection error:"));
+db.on("open", function (){
+  console.log("Successful connection!");
+});
 
-//rotas
-const index = require("./routes/index")
-const tarefas = require("./routes/tarefasRoute")
-const colaboradoras = require("./routes/colaboradorasRoute")
-
-//configurar body parser
 app.use(bodyParser.json());
-// app.use(express.json()); - Podemos usar a propria função de parser de json do express, sem a necessidade de instalar o body parser
-
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*")
+app.use(function (req, res, next){
+  res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-    )
-    next()
-  })
+    "Origin, X-Request-With, Content-Type, Accept"
+  );
+  next();
+});
+app.use("/", index);
+app.use("/users", users);
+app.use("/playlists", playlists);
 
-app.use("/", index)
-app.use("/tarefas", tarefas)
-app.use("/colaboradoras", require("./routes/colaboradorasRoute"))
-
-module.exports = app
+module.exports = app;
